@@ -1,0 +1,9 @@
+views/
+paths/
+animation/*.png
+*.*~
+.*.swp
+.*.swo
+*.log
+*.aux
+*.synctex.gz

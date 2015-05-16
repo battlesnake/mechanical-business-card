@@ -1,0 +1,157 @@
+\documentclass[12pt]{article}
+
+\PassOptionsToPackage{svgnames}{xcolor}
+\usepackage[margin=2cm]{geometry}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usetikzlibrary{trees}
+\usetikzlibrary{decorations.markings}
+
+\newenvironment{diagram} {
+	\vspace{1ex}
+	\begin{center}
+	\begin{tikzpicture}
+} {
+	\end{tikzpicture}
+	\end{center}
+	\vspace{1ex}
+}
+
+\setlength\parskip{0.5ex}
+
+\begin{document}
+
+\section*{The system}
+
+The system consists of the following components:
+
+\begin{itemize}
+	\setlength\itemsep{0ex}
+	\item "Sun gear" in centre, with $N_s$ teeth and angular velocity $\omega_s$.
+	\item "Planet gears" surrounding sun gear, with $N_p$ teeth and angular velocity $\omega_p$.
+	\item "Annular gear" surrounding planet gears, with $N_a$ teeth and angular velocity $\omega_a$.
+	\item "Planet carrier" which is fixed to each planet's axle with angular velocity $\omega_c$.
+\end{itemize}
+
+\begin{diagram}
+
+\pgfkeys{/tikz/.cd,
+  circle color/.initial=black,
+  circle color/.get=\circlecolor,
+  circle color/.store in=\circlecolor,
+}
+\tikzset{teeth/.style args={#1 and #2}{
+   postaction=decorate,
+   decoration={
+    markings,
+    mark=
+    between positions 0 and 1 step #2
+      with
+      {
+       \fill[radius=#1,\circlecolor] (0,0) circle;
+      }
+    }
+  },
+  teeth/.default={1pt and 3pt},
+}
+\tikzstyle{annular}=[draw=black, fill=none]
+\tikzstyle{sun}=[draw=black, fill=yellow]
+\tikzstyle{planet}=[draw=black, fill=SkyBlue]
+\tikzstyle{gear}=[teeth]
+
+\draw [annular,gear] (0,0) circle (5) node[anchor=south west] at (3.5,3.5) {$N_a$};
+\draw [sun,gear] (0,0) circle (1) node {$N_s$};
+
+\newcommand{\planetGeometry}[1]{
+	\pgfmathsetmacro{\i}{#1}
+	\pgfmathsetmacro{\r}{3}
+	\pgfmathsetmacro{\c}{2.5}
+	\pgfmathsetmacro{\C}{3.8}
+	\pgfmathsetmacro{\l}{4.35}
+	\pgfmathsetmacro{\t}{\i*120 + 15}
+	\pgfmathsetmacro{\s}{\t-120}
+	\pgfmathsetmacro{\px}{\r*cos(\t)}
+	\pgfmathsetmacro{\py}{\r*sin(\t)}
+	\pgfmathsetmacro{\lx}{\l*cos(\t)}
+	\pgfmathsetmacro{\ly}{\l*sin(\t)}
+	\pgfmathsetmacro{\u}{\c*cos(\s)}
+	\pgfmathsetmacro{\v}{\c*sin(\s)}
+	\pgfmathsetmacro{\U}{\C*cos(\s)}
+	\pgfmathsetmacro{\V}{\C*sin(\s)}
+	\pgfmathsetmacro{\x}{\c*cos(\t)}
+	\pgfmathsetmacro{\y}{\c*sin(\t)}
+	\pgfmathsetmacro{\X}{\C*cos(\t)}
+	\pgfmathsetmacro{\Y}{\C*sin(\t)}
+}
+\foreach \i in {0,...,2} {
+	\planetGeometry{\i}
+	\draw [planet,gear] (\px,\py) circle (2) node {$N_p$} ;
+	\draw [planet] (\lx,\ly) node {$N_p$} ;
+}
+\foreach \i in {0,...,2} {
+	\planetGeometry{\i}
+	\fill [blue] (\u,\v) -- (\x,\y) -- (\X,\Y) -- (\U,\V) -- cycle ;
+	\draw (\u,\v) -- (\x,\y) ;
+	\draw (\U,\V) -- (\X,\Y) ;
+}
+
+\end{diagram}
+
+Input and output can be connected to any of the gears, or to the carrier.  If a planet gear is directly used for input or output, the system reduces to a simple 2-gear system.
+
+In terms of reference frames, we have:
+
+\tikzstyle{every node}=[thick,anchor=west, inner sep=3pt, rounded corners, draw=black]
+\tikzstyle{noframe}=[thick,anchor=west, inner sep=3pt, draw=none]
+
+\begin{diagram}[%
+		grow via three points={one child at (0.5em,-2.0em) and two children at (0.5em,-2.0em) and (0.5em,-4.0em)},
+		edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}
+	]
+	\node {The system frame}
+		child { node {The sun frame} }
+		child { node {The carrier and planets frame}
+			child { node {Planet 1 frame} }
+			child { node [noframe] {\hspace{3.5ex}\vdots\hspace{3ex}\vdots\hspace{3ex}\vdots} }
+			child { node {Planet $n$ frame} }
+		}
+		child { node at (0, -6em) {The annular frame} }
+	;
+\end{diagram}
+
+\section*{Solving}
+
+\subsection*{Fixed carrier}
+
+In the case where the carrier is fixed, gear ratios and thus rotation rates are trivial to obtain:
+
+\begin{align*}
+	\omega_s : \omega_p &= N_p : -N_s\\
+	\omega_p : \omega_a &= N_a : N_p\\
+	\omega_s : \omega_a &= N_a : -N_s\\[0.5ex]
+	\therefore\:\omega_s : \omega_p : \omega_a : \omega_c
+		&= 1 : -\frac{N_s}{N_p} : -\frac{N_s}{N_a} : 0
+\end{align*}
+
+Note: all rotation rates are relative to orientation of parent frame.
+
+\subsection*{Fixed annular gear}
+
+To fix the annular gear instead of the carrier, we require that $\omega_c$ become free and that $\omega_a = 0$.  This is achieved by applying a rotation to the top-level frames to cancel out the rotation of the annular gear's frame.  We calculate the new rotation rates $\omega_x$ for all child frames of the system frame:
+
+\def\wa{\frac{N_s}{N_a}}
+
+\begin{align*}
+	\omega_x &\rightarrow \omega^\prime_x - \left(-\frac{N_s}{N_a}\right)
+		\textsf{\quad only for $\omega_x$ that are relative to the system frame}\\[1ex]
+	\intertext{Note that $\omega_p$ is not changed since it is measured relative to the carrier frame, not the system frame.}
+	\omega_s : \omega_p : \omega_a : \omega_c
+		&= 1+\wa : -\frac{N_s}{N_p} : 0 : \wa\\[0.5ex]
+		&= \frac{N_a+N_s}{N_a} : -\frac{N_s}{N_p} : 0 : \wa\\[1ex]
+	\intertext{For convenience, normalize the sun gear:}
+	\omega_s : \omega_p : \omega_a : \omega_c
+		&= 1 : -\frac{N_sN_a}{N_p\left(N_a+N_s\right)} : 0 : \frac{N_s}{N_a+N_s}
+\end{align*}
+
+\end{document}
