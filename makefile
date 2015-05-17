@@ -43,6 +43,7 @@ paths/%.scad: shapes/%.scad | paths/
 paths/%.svg: paths/%.scad
 	@printf -- '\e[35mGenerating %s\e[0m\n' $@
 	@openscad -o $@ $(scadopts) $<
+	@sed -i -e 's/stroke-width=\"0\.5\"/stroke-width=\"0.1\"/g' $@
 
 paths/%.dxf: paths/%.scad
 	@printf -- '\e[35mGenerating %s\e[0m\n' $@
