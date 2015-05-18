@@ -121,7 +121,7 @@ function renderFrame {
 	declare file="${out}/$(frameName $actualFrame)"
 	declare f="$(printf -- '%04d' "$frame")"
 	declare t="$(fdiv $frame $((frames - 1)))"
-	declare explode="$(fint 40 0 $t ease 5)"
+	declare explode="$(fint 40 0.0001 $t ease 5)"
 	declare camA="60"
 	declare camB="0"
 	declare camC="$(fint 800 320 $t easeIn 7)"
@@ -129,11 +129,11 @@ function renderFrame {
 	declare camY="0"
 	declare camZ="$(fint 70 -5 $t ease 7)"
 	declare camR="$(fint 600 150 $t linear 6)"
-	declare materials="$(fint 0 100 $t easeOut 4.5)"
+	declare materials="$(fint 0 100 $t easeOut 4.8)"
 	# Render of frame with and without materials
 	printf -- '%s\n' "true" "false" | xargs -I {} \
 		openscad -o "${tmp}/frame-{}.png" \
-			-D "Wd=$(fint 0 1500 $(fdiv $actualFrame $totalFrames) easeIn 7)" \
+			-D "Wd=$(fint 0 5000 $(fdiv $actualFrame $totalFrames) easeIn 5)" \
 			-D "\$fn=${fn}" \
 			-D 'materials={}' \
 			-D "explode=$explode" \
@@ -162,18 +162,18 @@ function renderGif {
 	rm -f -- "${out}"/*.gif
 
 	local video="${out}/animation.mp4"
-	local filters='fps=18,scale=576:-1:flags=lanczos'
+	local filters='scale=640:-1:flags=lanczos'
 
 	ffmpeg -v warning \
 		-i "${video}" \
-		-vf "${filters},palettegen" \
+		-vf "${filters},palettegen=max_colors=160:stats_mode=diff" \
 		-c:v png -f image2 - | \
-	ffmpeg \
+	ffmpeg -v warning \
 		-i "${video}" -i - \
-		-lavfi "${filters} [x]; [x][1:v] paletteuse=dither=floyd_steinberg" \
-		-gifflags +transdiff \
-		-f gif - | \
-	gifsicle -b --gamma=3.0 --colors=144 --optimize=3 -o "${out}/animation.gif"
+		-lavfi "${filters} [x]; [x][1:v] paletteuse=dither=bayer:diff_mode=rectangle" \
+		-f gif - | pv -b | \
+	gifsicle -b --optimize=3 -o "${out}/animation.gif"
+	du -Bk "${out}/animation.gif"
 }
 
 # Parameter processor

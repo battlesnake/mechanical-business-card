@@ -25,49 +25,58 @@ explode = 10;
 materials = false;
 metalColor = "silver";
 plasticColor = "aqua";
-plasticAlpha = 0.2;
+plasticAlpha = 0.1;
 
 /* Alpha multiplier for all layers */
 alpha = materials ? 1 : 0.4;
 
 /* Gear teeth count */
-driveGearTeeth = 75;
-annularGearTeeth = 72;
-planetGearTeeth = 24;
-sunGearTeeth = annularGearTeeth - 2 * planetGearTeeth;
+driveGearTeeth = 24;
+gearTeeth = [45, 24, 32];
+
+/* Gear orientations (relative to previous gear) */
+gearOrientations = [20, -60, 80];
+
+/* Gear rotation */
+Wd = 1000 * $t;
+driveGearRotation = Wd;
+
+gearRotations =
+	let (W1 = -Wd * driveGearTeeth / gearTeeth[0])
+	let (W2 = -W1 * gearTeeth[0] / gearTeeth[1])
+	let (W3 = -W2 * gearTeeth[1] / gearTeeth[2])
+	[W1, W2, W3];
+
+reciprocatorTeeth = 2;
+reciprocatorFullTeeth = reciprocatorTeeth * 4;
+reciprocatorTeethPitch = 1;
+reciprocatorRadius = gearRadius(reciprocatorFullTeeth);
+reciprocatorInnerRadius = reciprocatorRadius - reciprocatorTeethPitch;
+reciprocatorOuterRadius = reciprocatorRadius + reciprocatorTeethPitch;
+
+reciprocatorPinionThickness = 3;
+reciprocatorPinionInnerSize =
+	let (reciprocatorPinionHeight = reciprocatorInnerRadius * 2)
+	let (reciprocatorPinionWidth = reciprocatorPinionHeight * 2.8)
+	[reciprocatorPinionWidth, reciprocatorPinionHeight];
+reciprocatorPinionOuterSize = reciprocatorPinionInnerSize + reciprocatorPinionThickness * [2, 2];
+reciprocatorRounding = 1/2;
+
+reciprocatorPinSize = [4, 0.5];
+reciprocatorPinFrameSize = [6, 4];
+reciprocatorPinOffset = [
+	(reciprocatorPinionInnerSize[0] + reciprocatorPinFrameSize[0]) / 2,
+	0
+];
 
 /* How much of the drive gear to expose through the card's side */
 driveGearExposed = 2;
 
 /* Gear radii */
 driveGearRadius = gearRadius(driveGearTeeth);
-sunGearRadius = gearRadius(sunGearTeeth);
-planetGearRadius = gearRadius(planetGearTeeth);
-annularGearRadius = gearRadius(annularGearTeeth, annular = true);
+gearRadii = [for (teeth = gearTeeth) gearRadius(teeth)];
 
-/* Number of planets */
-planetCount = 3;
+driveGearAxleRadius = 2;
+axleRadius = 1;
 
-/* Gear phase */
-sunGearPhase = 3;
-planetGearPhase = 0;
-planetCarrierPhase = 0;
-annularGearPhase = 0;
-
-/* Gear rotation */
-Nd = driveGearTeeth;
-Ns = sunGearTeeth;
-Np = planetGearTeeth;
-Na = annularGearTeeth;
-
-Wd = 100 * $t;
-Ws = -Wd * Nd / Ns;
-Wp = Ws * -Ns * Na / (Np * (Na + Ns));
-Wc = Ws * Ns / (Na + Ns);
-Wa = 0;
-
-driveGearRotation = Wd;
-sunGearRotation = Ws + sunGearPhase;
-planetGearRotation = Wp + planetGearPhase;
-planetCarrierRotation = Wc + planetCarrierPhase;
-annularGearRotation = Wa + annularGearPhase;
+cloudSize = [12, 8];

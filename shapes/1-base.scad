@@ -1,12 +1,15 @@
 include <../config.scad>
+include <../geometry/cloud-frames.scad>
 include <../generators/layer.scad>
 
 module baseShape() {
 	difference() {
 		layer();
-		/* Sun gear axle */
-		translate([driveGearRadius * 2 + sunGearRadius - driveGearExposed, cardSize[1] / 2]) {
-			circle(r = 0.4, center = true);
+		/* Cloud gear axles */
+		for (i = [0:2]) {
+			multmatrix(m = cloudFrames[i]) {
+				circle(r = gearHoleRadius - 0.1, center = true);
+			}
 		}
 	}
 }

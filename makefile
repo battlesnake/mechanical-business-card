@@ -36,7 +36,7 @@ assembly: assembly.scad | views/
 
 views/%.scad: parts/%.scad | views/
 	@printf -- '\e[35mGenerating %s\e[0m\n' $@
-	@printf -- '%s\n' 'include <../$<>;' '$(shell printf -- '%s' "$*" | sed -E 's/^[0-9]+-//g; s/-([a-z])/\u\1/g;')();' > $@
+	@printf -- '%s\n' 'include <../$<>;' '$(shell printf -- '%s' "$*" | sed -E 's/^[0-9]+-//g; s/-(.)/\u\1/g;')();' > $@
 
 views/%.png: views/%.scad
 	@printf -- '\e[35mRendering %s\e[0m\n' $@
@@ -44,7 +44,7 @@ views/%.png: views/%.scad
 
 paths/%.scad: shapes/%.scad | paths/
 	@printf -- '\e[35mGenerating %s\e[0m\n' $@
-	@printf -- '%s\n' "include <../$<>;" "$$(printf -- '%s' "$*" | sed -E 's/^[0-9]+-//g; s/-([a-z])/\u\1/g;')Shape();" > $@
+	@printf -- '%s\n' "include <../$<>;" "$$(printf -- '%s' "$*" | sed -E 's/^[0-9]+-//g; s/-(.)/\u\1/g;')Shape();" > $@
 
 paths/%.svg: paths/%.scad
 	@printf -- '\e[35mGenerating %s\e[0m\n' $@

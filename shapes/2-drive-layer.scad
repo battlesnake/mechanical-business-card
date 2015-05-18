@@ -1,15 +1,18 @@
 include <../config.scad>
 include <../generators/layer.scad>
 include <../generators/gear.scad>
+include <../geometry/cloud-frames.scad>
 
 module driveLayerShape() {
 	difference() {
 		layer();
-		translate([driveGearRadius - driveGearExposed, cardSize[1] / 2]) {
+		multmatrix(driveFrame) {
 			gearHousing(driveGearTeeth);
 		}
-		translate([driveGearRadius * 2 + sunGearRadius - driveGearExposed - gearOverlap, cardSize[1] / 2]) {
-			gearHousing(sunGearTeeth);
+		for (i = [0:2]) {
+			multmatrix(cloudFrames[i]) {
+				gearHousing(gearTeeth[i]);
+			}
 		}
 	}
 }
