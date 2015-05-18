@@ -5,9 +5,18 @@ set -euo pipefail
 # Quality
 declare HQ="${HQ:-0}"
 
-# Render resolution
-declare resX="$(( HQ ? 2560 : 800 ))"
-declare resY="$(( HQ ? 1440 : 450))"
+# Render resolution (higher than video resolution to give supersampling / AA
+declare resX="$(( HQ ? 3840 : 800 ))"
+declare resY="$(( HQ ? 2160 : 450))"
+
+# Video resolution
+declare crf=14
+declare vidres
+if (( HQ )); then
+	vidres=hd1080
+else
+	vidres="${resX}x${resY}"
+fi
 
 # 3D resolution
 declare fn="$(( HQ ? 400 : 10 ))"
@@ -19,14 +28,6 @@ declare totalFrames="$(( frames + framesAfter ))"
 
 # Frame rate
 declare rate="$(( HQ ? 24 : 8 ))"
-
-# Video resolution
-declare vidres
-if (( HQ )); then
-	vidres=hd720
-else
-	vidres="${resX}x${resY}"
-fi
 
 # Temp folder
 
@@ -150,9 +151,29 @@ function renderVideo {
 	ffmpeg -r $rate -i "${out}/frame%04d.png" \
 		-s "${vidres}" \
 		-c:v libx264 \
-		-crf 10 \
+		-crf "${crf}" \
 		-pix_fmt yuv444p \
 		-y "${out}/animation.mp4"
+}
+
+# Render GIF from video
+
+function renderGif {
+	rm -f -- "${out}"/*.gif
+
+	local video="${out}/animation.mp4"
+	local filters='fps=18,scale=576:-1:flags=lanczos'
+
+	ffmpeg -v warning \
+		-i "${video}" \
+		-vf "${filters},palettegen" \
+		-c:v png -f image2 - | \
+	ffmpeg \
+		-i "${video}" -i - \
+		-lavfi "${filters} [x]; [x][1:v] paletteuse=dither=floyd_steinberg" \
+		-gifflags +transdiff \
+		-f gif - | \
+	gifsicle -b --gamma=3.0 --colors=144 --optimize=3 -o "${out}/animation.gif"
 }
 
 # Parameter processor
@@ -177,10 +198,12 @@ while (( $# )); do
 		;;
 	frames) renderFrames;;
 	video) renderVideo;;
+	gif) renderGif;;
 	all)
 		clean
 		renderFrames
 		renderVideo
+		renderGif
 		;;
 	allhq)
 		(
