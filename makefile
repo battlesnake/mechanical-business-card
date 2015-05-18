@@ -9,9 +9,15 @@ pathimages=$(pathviews:paths/%.scad=paths/%.svg)
 
 scadopts=-D '$$fn=200'
 
-.PHONY: default assembly
+.PHONY: default images paths pathimages assembly
 
-default: $(images) $(paths) $(pathimages) assembly
+default: images paths assembly
+
+images: $(images)
+
+paths: $(paths)
+
+pathimages: $(pathimages)
 
 clean:
 	@printf -- '\e[35mRemoving output files\e[0m\n'
