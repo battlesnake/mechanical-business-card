@@ -7,3 +7,4 @@ animation/*.png
 *.log
 *.aux
 *.synctex.gz
+order/
