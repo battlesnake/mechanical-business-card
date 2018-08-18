@@ -15,8 +15,11 @@ cornerRadius = 3;
 cornerHoleRadius = 0.5;
 
 /* Thickness of thin and of thick layers */
-thin = 0.25;
-thick = 0.5;
+thin = 0.2;
+thick = 0.4;
+
+/* Space to leave between layer boundary and moving part */
+spacing = 0.06;
 
 /* Extra distance between layers for exploded view */
 explode = 10;
@@ -71,3 +74,7 @@ sunGearRotation = Ws + sunGearPhase;
 planetGearRotation = Wp + planetGearPhase;
 planetCarrierRotation = Wc + planetCarrierPhase;
 annularGearRotation = Wa + annularGearPhase;
+
+hq = 1;
+
+$fn = hq ? 720 : 90;

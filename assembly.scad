@@ -8,7 +8,6 @@ include <parts/3-mid-layer.scad>
 include <parts/4-planetary-layer.scad>
 include <parts/4-planetary-gears.scad>
 include <parts/5-info-layer.scad>
-include <parts/5-text-content.scad>
 
 /*
  * LAYERS:
@@ -71,10 +70,10 @@ translate([0, 0, z(3, 1, 3)]) {
 translate([0, 0, z(3, 2, 4)]) {
 	
 	color(materials ? plasticColor : "aqua", alpha * plasticAlpha)
-		infoLayer();	   
+		topLayer();	   
 	
 	color("white", alpha * 0.7)
-		textContent(visible = true);	   
+		textContent(additive = true);  
 	
 }
 
